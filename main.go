@@ -63,6 +63,7 @@ func main() {
 		isEqual, _ := CompareArgs(paths, ValidityOpts{}, DefaultOpts{}, k)
 		fmt.Printf("%s flags keep consistency? %t\n", k, isEqual)
 		if !isEqual {
+			fmt.Printf("\n++++ Buildding abort! ++++\n")
 			fmt.Printf("++++ Please check %s args in \"%s\" and \"%s\"! ++++\n", k, relative_prefix_path + conf_paths.validity_check_conf_path, relative_prefix_path + v)
 			os.Exit(1)
 		}
