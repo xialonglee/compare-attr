@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"reflect"
 	"strings"
+	"os"
 )
 
 type config_paths struct {
@@ -39,17 +40,20 @@ type ValidityOpts struct {
 //const relative_prefix_path = "/home/k8s_kdt/kdt/"
 const relative_prefix_path = "D:\\go_src\\contrib\\ansible\\"
 
-var Conf_paths = config_paths{
-	flannel_conf_path:        "roles/flannel/defaults/main.yaml",
-	master_conf_path:         "roles/master/defaults/main.yml",
-	node_conf_path:           "roles/node/defaults/main.yml",
-	validity_check_conf_path: "roles/validity-check/defaults/main.yml",
-}
-
 func main() {
-	paths := [2]string{relative_prefix_path + Conf_paths.validity_check_conf_path, relative_prefix_path + Conf_paths.flannel_conf_path}
-	fmt.Println(CompareArgs(paths, ValidityOpts{}, DefaultOpts{}, "flannel"))
+	var conf_paths = config_paths{
+		flannel_conf_path:        "roles/flannel/defaults/main.yaml",
+		master_conf_path:         "roles/master/defaults/main.yml",
+		node_conf_path:           "roles/node/defaults/main.yml",
+		validity_check_conf_path: "roles/validity-check/defaults/main.yml",
+	}
 
+	paths := [2]string{conf_paths.validity_check_conf_path, conf_paths.flannel_conf_path}
+	isEqual, _ := CompareArgs(paths, ValidityOpts{}, DefaultOpts{}, "flannel")
+	fmt.Println("flannel flags keep consistency? ", isEqual)
+	if !isEqual {
+		os.Exit(-1)
+	}
 }
 
 func CompareArgs(file_path [2]string, validity_opts ValidityOpts, default_opts DefaultOpts, component_name string) (bool bool, err error) {
@@ -60,8 +64,8 @@ func CompareArgs(file_path [2]string, validity_opts ValidityOpts, default_opts D
 		return false, err
 	}
 
-	fmt.Printf("validity_value is %v\n", validity_value)
-	fmt.Printf("default_value is %v\n", default_value)
+	fmt.Printf("%s validity args are %v\n", component_name, validity_value)
+	fmt.Printf("%s default args are %v\n", component_name, default_value)
 	if isInclude(validity_value, default_value) && isInclude(default_value, validity_value) {
 		return true, nil
 	}
@@ -69,13 +73,13 @@ func CompareArgs(file_path [2]string, validity_opts ValidityOpts, default_opts D
 }
 
 func yaml_unmarshal(file_path [2]string, validity_opts ValidityOpts, default_opts DefaultOpts, field_name string) ([]string, []string, error) {
-	data, err := ioutil.ReadFile(file_path[0])
+	data, err := ioutil.ReadFile(relative_prefix_path + file_path[0])
 	if err != nil {
 		return []string{}, []string{}, fmt.Errorf("Reading config file failed: %v", err)
 	}
 	yaml.Unmarshal(data, &validity_opts)
 
-	data, err = ioutil.ReadFile(file_path[1])
+	data, err = ioutil.ReadFile(relative_prefix_path + file_path[1])
 	if err != nil {
 		return []string{}, []string{}, fmt.Errorf("Reading config file failed: %v", err)
 	}
