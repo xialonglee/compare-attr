@@ -50,14 +50,14 @@ func main() {
 
 	paths := [2]string{conf_paths.validity_check_conf_path, conf_paths.flannel_conf_path}
 	isEqual, _ := CompareArgs(paths, ValidityOpts{}, DefaultOpts{}, "flannel")
-	fmt.Println("flannel flags keep consistency? ", isEqual)
+	fmt.Println("flannel flags keep consistency?", isEqual)
 	if !isEqual {
-		os.Exit(-1)
+		os.Exit(1)
 	}
 }
 
 func CompareArgs(file_path [2]string, validity_opts ValidityOpts, default_opts DefaultOpts, component_name string) (bool bool, err error) {
-	fmt.Printf("Check %s args in path %s and path %s.\n", component_name, file_path[0], file_path[1])
+	fmt.Printf("Check %s args in \"%s\" and \"%s\".\n", component_name, file_path[0], file_path[1])
 	field_name := strings.Title(component_name + "_opts")
 	validity_value, default_value, err := yaml_unmarshal(file_path, validity_opts, default_opts, field_name)
 	if err != nil {
