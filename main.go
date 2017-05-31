@@ -18,46 +18,59 @@ type config_paths struct {
 }
 
 type DefaultOpts struct {
-	Flannel_opts         []string `yaml:"flannel_options"`
-	Kubelet_opts         []string `yaml:"kubelet_options"`
-	Kube_proxy_opts      []string `yaml:"kube_proxy_options"`
-	Kube_apiserver_opts  []string `yaml:"kube_apiserver_options"`
-	Kube_controller_opts []string `yaml:"kube_controller_manager_options"`
-	Kube_scheduller_opts []string `yaml:"kube_scheduler_options"`
+	Flannel_opts                 []string `yaml:"flannel_options"`
+	Kubelet_opts                 []string `yaml:"kubelet_options"`
+	Kube_proxy_opts              []string `yaml:"kube_proxy_options"`
+	Kube_apiserver_opts          []string `yaml:"kube_apiserver_options"`
+	Kube_controller_manager_opts []string `yaml:"kube_controller_manager_options"`
+	Kube_scheduler_opts          []string `yaml:"kube_scheduler_options"`
 }
 
 type ValidityOpts struct {
 	Args_check struct {
-			   Flannel_opts         []string `yaml:"flannel_options"`
-			   Kubelet_opts         []string `yaml:"kubelet_options"`
-			   Kube_proxy_opts      []string `yaml:"kube_proxy_options"`
-			   Kube_apiserver_opts  []string `yaml:"kube_apiserver_options"`
-			   Kube_controller_opts []string `yaml:"kube_controller_manager_options"`
-			   Kube_scheduller_opts []string `yasml:"kube_scheduler_options"`
+			   Flannel_opts                 []string `yaml:"flannel_options"`
+			   Kubelet_opts                 []string `yaml:"kubelet_options"`
+			   Kube_proxy_opts              []string `yaml:"kube_proxy_options"`
+			   Kube_apiserver_opts          []string `yaml:"kube_apiserver_options"`
+			   Kube_controller_manager_opts []string `yaml:"kube_controller_manager_options"`
+			   Kube_scheduler_opts          []string `yaml:"kube_scheduler_options"`
 		   } `yaml: args_check`
 }
 
-//const relative_prefix_path = "/home/k8s_kdt/kdt/"
-const relative_prefix_path = "D:\\go_src\\contrib\\ansible\\"
+const relative_prefix_path = "/home/k8s_kdt/kdt/"
+//const relative_prefix_path = "D:\\go_src\\contrib\\ansible\\"
 
 func main() {
+	fmt.Println("++++ This tool check wheather default flags are same as in the role 'validity-check' in building process. ++++")
+	fmt.Println("++++ Repository lies in https://github.com/xialonglee/compare-attr ++++")
 	var conf_paths = config_paths{
 		flannel_conf_path:        "roles/flannel/defaults/main.yaml",
 		master_conf_path:         "roles/master/defaults/main.yml",
 		node_conf_path:           "roles/node/defaults/main.yml",
 		validity_check_conf_path: "roles/validity-check/defaults/main.yml",
 	}
+	mapper := map[string]string{
+		"flannel": conf_paths.flannel_conf_path,
+		"kube_apiserver" : conf_paths.master_conf_path,
+		"kube_controller_manager":conf_paths.master_conf_path,
+		"kube_scheduler" : conf_paths.master_conf_path,
+		"kubelet": conf_paths.node_conf_path,
+		"kube_proxy": conf_paths.node_conf_path,
+	}
 
-	paths := [2]string{conf_paths.validity_check_conf_path, conf_paths.flannel_conf_path}
-	isEqual, _ := CompareArgs(paths, ValidityOpts{}, DefaultOpts{}, "flannel")
-	fmt.Println("flannel flags keep consistency?", isEqual)
-	if !isEqual {
-		os.Exit(1)
+	for k, v := range mapper {
+		paths := [2]string{conf_paths.validity_check_conf_path, v}
+		isEqual, _ := CompareArgs(paths, ValidityOpts{}, DefaultOpts{}, k)
+		fmt.Printf("%s flags keep consistency?%t\n", k, isEqual)
+		if !isEqual {
+			fmt.Printf("Please %s check args if consistency in \"%s\" and \"%s\"", k, relative_prefix_path + conf_paths.validity_check_conf_path, relative_prefix_path + v)
+			os.Exit(1)
+		}
 	}
 }
 
 func CompareArgs(file_path [2]string, validity_opts ValidityOpts, default_opts DefaultOpts, component_name string) (bool bool, err error) {
-	fmt.Printf("Check %s args in \"%s\" and \"%s\".\n", component_name, file_path[0], file_path[1])
+	fmt.Printf("\n++++ Check %s args in \"%s\" and \"%s\". ++++\n", component_name, file_path[0], file_path[1])
 	field_name := strings.Title(component_name + "_opts")
 	validity_value, default_value, err := yaml_unmarshal(file_path, validity_opts, default_opts, field_name)
 	if err != nil {
