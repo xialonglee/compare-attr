@@ -77,8 +77,8 @@ func CompareArgs(file_path [2]string, validity_opts ValidityOpts, default_opts D
 		return false, err
 	}
 
-	fmt.Printf("%s validity args are %v\n", component_name, validity_value)
-	fmt.Printf("%s default args are %v\n", component_name, default_value)
+	fmt.Printf("%s validity args are: %v\n", component_name, validity_value)
+	fmt.Printf("%s default args are: %v\n", component_name, default_value)
 	if isInclude(validity_value, default_value) && isInclude(default_value, validity_value) {
 		return true, nil
 	}
