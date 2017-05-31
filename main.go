@@ -37,12 +37,12 @@ type ValidityOpts struct {
 		   } `yaml: args_check`
 }
 
-const relative_prefix_path = "/home/k8s_kdt/kdt/"
-//const relative_prefix_path = "D:\\go_src\\contrib\\ansible\\"
+const relative_prefix_path = "../"
 
 func main() {
 	fmt.Println("++++ This tool check wheather default flags are same as in the role 'validity-check' in building process. ++++")
 	fmt.Println("++++ Repository lies in https://github.com/xialonglee/compare-attr ++++")
+	fmt.Println("++++ Put this tool in 'build' directory ++++")
 	var conf_paths = config_paths{
 		flannel_conf_path:        "roles/flannel/defaults/main.yaml",
 		master_conf_path:         "roles/master/defaults/main.yml",
@@ -61,9 +61,9 @@ func main() {
 	for k, v := range mapper {
 		paths := [2]string{conf_paths.validity_check_conf_path, v}
 		isEqual, _ := CompareArgs(paths, ValidityOpts{}, DefaultOpts{}, k)
-		fmt.Printf("%s flags keep consistency?%t\n", k, isEqual)
+		fmt.Printf("%s flags keep consistency? %t\n", k, isEqual)
 		if !isEqual {
-			fmt.Printf("Please %s check args if consistency in \"%s\" and \"%s\"", k, relative_prefix_path + conf_paths.validity_check_conf_path, relative_prefix_path + v)
+			fmt.Printf("++++ Please check %s args in \"%s\" and \"%s\"! ++++\n", k, relative_prefix_path + conf_paths.validity_check_conf_path, relative_prefix_path + v)
 			os.Exit(1)
 		}
 	}
